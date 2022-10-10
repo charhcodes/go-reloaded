@@ -1,13 +1,15 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	content, err := ioutil.ReadFile("sample.txt")
+	content, err := os.ReadFile("sample.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,7 +31,6 @@ func checkPunct(content []string) bool {
 	return false
 }
 
-/*
 func Hex(s string) int64 {
 	decimal, err := strconv.ParseInt(s, 16, 32)
 	if err != nil {
@@ -37,4 +38,3 @@ func Hex(s string) int64 {
 	}
 	return decimal
 }
-*/
