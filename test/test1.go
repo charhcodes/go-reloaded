@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
+// check + replace hex, bin, up, low, cap
 func convertString(strContent []string) []string {
-	// check + replace hex, bin, up, low, cap
 	var emptyString []string
 	for i := 0; i < len(strContent); i++ {
 		switch strContent[i] {
@@ -64,78 +64,46 @@ func convertString(strContent []string) []string {
 		default:
 			emptyString = append(emptyString, strContent[i])
 		}
-		return emptyString
 	}
-	// check + replace 'a'
-	for l := 1; l < len(emptyString); l++ {
-		if checkA(emptyString) == true {
-			if checkVowel(emptyString) == true {
-				emptyString = append(emptyString, "n")
+	return emptyString
+}
+
+// convert 'a' to 'an' when next word begins with a vowel or 'h'
+func aToAn(strContent []string) []string {
+	for i := 0; i < len(strContent); i++ {
+		if strContent[i] == "a" {
+			runes := []rune(strContent[i+1])
+			if runes[0] == 'a' || runes[0] == 'e' || runes[0] == 'i' || runes[0] == 'o' || runes[0] == 'u' || runes[0] == 'h' {
+				strContent[i] += "n"
 			}
 		}
 	}
+	return strContent
+}
 
-	// check + move punctuation
-	runes := []rune(emptyString)
-	for k := 1; k < len(emptyString); k++ {
-		if checkPunct(runes) == true {
-			if runes[k+1] != ' ' {
-				runes[k], runes[k+1] = runes[k+1], runes[k]
+// find and fix non-quote punctuation (if space BEFORE punctuation)
+func fixPunct(strContent []string) []string {
+	runes := []rune(strings.Join(strContent, " "))
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == '.' || runes[i] == ',' || runes[i] == '!' || runes[i] == '?' || runes[i] == ';' || runes[i] == ':' {
+			if runes[i-1] == ' ' {
+				runes[i], runes[i-1] = runes[i-1], runes[i]
 			}
 		}
-		return runes
 	}
+	runeString := string(runes)
+	sliceString := strings.Split(runeString, " ")
+	return sliceString
 }
 
-// check punctuation (except apostrophes)
-func checkPunct(strContent []rune) bool {
-	for i := 0; i < len(strContent); i++ {
-		switch strContent[i] {
-		case '.', ',', '!', '?', ':', ';':
-			return true
-		default:
-			return false
+func fixApostrophes(strContent []string) []string {
+	runes := []rune(strings.Join(strContent, " "))
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == 39 { // 39 = apostrophe 
+			if strContent == 
 		}
 	}
-	return true
 }
-
-// check if A
-func checkA(strContent []string) bool {
-	for i := 0; i < len(strContent); i++ {
-		switch strContent[i] {
-		case "a":
-			return true
-		default:
-			return false
-		}
-	}
-	return false
-}
-
-// check if next character is a vowel or 'H'
-func checkVowel(strContent []string) bool {
-	for i := 0; i < len(strContent); i++ {
-		switch strContent[i+1] {
-		case "a", "e", "i", "o", "u", "h":
-			return true
-		default:
-			return false
-		}
-	}
-	return false
-}
-
-// // check punctuation group
-// func checkPunctGrp(content []string) bool {
-// 	for _, content := range content {
-// 		switch content {
-// 		case "!?", "?!", "...":
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
 
 // // move punctuation
 // func movePunct(strContent []string) []string {
@@ -157,11 +125,13 @@ func main() {
 	}
 
 	str := string(input)
-	strContent := strings.Split(str, " ")
-	converted := convertString(strContent)
+	strContent := strings.Split(str, " ")  // separate by whitespaces
+	converted := convertString(strContent) // hex, bin, cap etc
+	convertedA := aToAn(converted)         // a to an
+	convertedP := fixPunct(convertedA)     // fix non-quotes punctuation
+
 	fmt.Println(strContent)
 	fmt.Println(converted)
-
-	movePunctStr := movePunct(strContent)
-	fmt.Println(movePunctStr)
+	fmt.Println(convertedA)
+	fmt.Println(convertedP)
 }
