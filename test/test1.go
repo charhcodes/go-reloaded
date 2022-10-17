@@ -9,6 +9,7 @@ import (
 )
 
 func convertString(strContent []string) []string {
+	// check + replace hex, bin, up, low, cap
 	var emptyString []string
 	for i := 0; i < len(strContent); i++ {
 		switch strContent[i] {
@@ -65,19 +66,64 @@ func convertString(strContent []string) []string {
 		}
 		return emptyString
 	}
+	// check + replace 'a'
+	for l := 1; l < len(emptyString); l++ {
+		if checkA(emptyString) == true {
+			if checkVowel(emptyString) == true {
+				emptyString = append(emptyString, "n")
+			}
+		}
+	}
+
+	// check + move punctuation
+	runes := []rune(emptyString)
+	for k := 1; k < len(emptyString); k++ {
+		if checkPunct(runes) == true {
+			if runes[k+1] != ' ' {
+				runes[k], runes[k+1] = runes[k+1], runes[k]
+			}
+		}
+		return runes
+	}
 }
 
 // check punctuation (except apostrophes)
-func checkPunct(strContent []string) bool {
+func checkPunct(strContent []rune) bool {
 	for i := 0; i < len(strContent); i++ {
 		switch strContent[i] {
-		case ".", ",", "!", "?", ":", ";":
+		case '.', ',', '!', '?', ':', ';':
 			return true
 		default:
 			return false
 		}
 	}
 	return true
+}
+
+// check if A
+func checkA(strContent []string) bool {
+	for i := 0; i < len(strContent); i++ {
+		switch strContent[i] {
+		case "a":
+			return true
+		default:
+			return false
+		}
+	}
+	return false
+}
+
+// check if next character is a vowel or 'H'
+func checkVowel(strContent []string) bool {
+	for i := 0; i < len(strContent); i++ {
+		switch strContent[i+1] {
+		case "a", "e", "i", "o", "u", "h":
+			return true
+		default:
+			return false
+		}
+	}
+	return false
 }
 
 // // check punctuation group
