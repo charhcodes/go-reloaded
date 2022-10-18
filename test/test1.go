@@ -147,17 +147,32 @@ func fixApostrophes(strContent []string) []string {
 	// runeString := string(runes)
 	// sliceString := strings.Split(runeString, " ")
 	// return sliceString
+
 	for i := 0; i < len(strContent); i++ {
 		quote := []string{"'"}
 		runeArr := []rune(strContent[i])
-		quoteCounter := 0
+		// quoteCounter := 0
 		if Contains(quote, string(runeArr[0])) { // if rune array contains quotation marks
-			quoteCounter++
-			if len(runeArr) 
-
-			if len(runeArr) == 1 && quoteCounter == 2 { // code for last apostrophe
+			//
+			// if len(runeArr) > 1 && runeArr[i-1] != ' ' {
+			// 	strContent[i+1] = string(runeArr[0]) + " "
+			// 	strContent = append(strContent[:i], strContent[i+1:]...)
+			// }
+			// for last apostrophe
+			if len(runeArr) == 1 {
 				strContent[i-1] += string(runeArr[0])
-				strContent = append(strContent[:i], strContent[i+1:]...)
+				strContent = append(strContent[:i], strContent[i+1:]...) // moves apostrophe back one space if by itself
+			} else if runeArr[i+1] == ' ' {
+				quoteCounter := 0
+				for j := 0; j < quoteCounter; j++ {
+					strContent[i-1] += string(runeArr[j])
+					strContent[i] = string(runeArr[:j])
+				}
+				// when quoteCounter = length of rune array
+				if quoteCounter == len(runeArr) {
+					// append string to include everything except i
+					strContent = append(strContent[:i], strContent[i+1:]...)
+				}
 			}
 		}
 	}
@@ -177,18 +192,18 @@ func fixApostrophes(strContent []string) []string {
 // }
 
 func main() {
-	// args := os.Args
-	input, err := os.ReadFile("sample.txt")
+	args := os.Args
+	input, err := os.ReadFile(args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	str := string(input)
-	strContent := strings.Split(str, " ")  // separate by whitespaces
-	converted := convertString(strContent) // hex, bin, cap etc
-	convertedA := aToAn(converted)         // a to an
-	convertedP := fixPunct(convertedA)     // fix non-quotes punctuation
-	convertedAP := fixApostrophes(convertedP)
+	strContent := strings.Split(str, " ")     // separate by whitespaces
+	converted := convertString(strContent)    // hex, bin, cap etc
+	convertedA := aToAn(converted)            // a to an
+	convertedP := fixPunct(convertedA)        // fix non-quotes punctuation
+	convertedAP := fixApostrophes(convertedP) // fixes quotation marks
 
 	fmt.Println(strContent)
 	fmt.Println(converted)
