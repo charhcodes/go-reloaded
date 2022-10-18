@@ -83,26 +83,85 @@ func aToAn(strContent []string) []string {
 
 // find and fix non-quote punctuation (if space BEFORE punctuation)
 func fixPunct(strContent []string) []string {
-	runes := []rune(strings.Join(strContent, " "))
-	for i := 0; i < len(runes); i++ {
-		if runes[i] == '.' || runes[i] == ',' || runes[i] == '!' || runes[i] == '?' || runes[i] == ';' || runes[i] == ':' {
-			if runes[i-1] == ' ' {
-				runes[i], runes[i-1] = runes[i-1], runes[i]
+	// runes := []rune(strings.Join(strContent, " "))
+	// for i := 1; i < len(strContent); i++ {
+	// 	if runes[i] == '.' || runes[i] == ',' || runes[i] == '!' || runes[i] == '?' || runes[i] == ';' || runes[i] == ':' {
+	// 		if runes[i-1] == ' ' {
+	// 			runes[i], runes[i-1] = runes[i-1], runes[i]
+	// 		}
+	// 	}
+	// }
+	// runeString := string(runes)
+	// sliceString := strings.Split(runeString, " ")
+	// return sliceString
+	for i := 0; i < len(strContent); i++ {
+		punctArray := []string{",", ".", "!", "?", ":", ";"}
+		runeArr := []rune(strContent[i])
+		if Contains(punctArray, string(runeArr[0])) { // if rune contains any punctuation
+			if len(runeArr) > 1 { // if punctuation is next to a letter or part of a group
+				punctCounter := 0
+				// if rune array contains punctuation and punct
+				for punctCounter < len(runeArr) && Contains(punctArray, string(runeArr[punctCounter])) {
+					punctCounter++
+				}
+				// loop to replace everything before i with j
+				for j := 0; j < punctCounter; j++ {
+					strContent[i-1] += string(runeArr[j])
+					strContent[i] = string(runeArr[j:])
+				}
+				// when punctCounter = length of rune array
+				if punctCounter == len(runeArr) {
+					// append string to include everything except i
+					strContent = append(strContent[:i], strContent[i+1:]...)
+				}
+			} else { // if punctuation is by itself (space on either side)
+				strContent[i-1] += string(runeArr[0])
+				strContent = append(strContent[:i], strContent[i+1:]...)
 			}
 		}
 	}
-	runeString := string(runes)
-	sliceString := strings.Split(runeString, " ")
-	return sliceString
+	return strContent
 }
 
-func fixApostrophes(strContent []string) []string {
-	runes := []rune(strings.Join(strContent, " "))
-	for i := 0; i < len(runes); i++ {
-		if runes[i] == 39 { // 39 = apostrophe 
-			if strContent == 
+// function to find out whether a string contains another string
+func Contains(elems []string, v string) bool {
+	for _, s := range elems {
+		if v == s {
+			return true
 		}
 	}
+	return false
+}
+
+// find and fix apostrophes (if space + a letter after apostrophe)
+func fixApostrophes(strContent []string) []string {
+	// runes := []rune(strings.Join(strContent, " "))
+	// for i := 1; i < len(strContent); i++ {
+	// 	if runes[i] == 39 { // 39 = apostrophe
+	// 		// if apostrophe is next to a space and a letter
+	// 		if runes[i+1] == ' ' && (runes[i+2] <= 'A' && runes[i+2] >= 'Z' || runes[i+2] <= 'a' && runes[i+2] >= 'z') {
+	// 			runes[i], runes[i+1] = runes[i+1], runes[i]
+	// 		}
+	// 	}
+	// }
+	// runeString := string(runes)
+	// sliceString := strings.Split(runeString, " ")
+	// return sliceString
+	for i := 0; i < len(strContent); i++ {
+		quote := []string{"'"}
+		runeArr := []rune(strContent[i])
+		quoteCounter := 0
+		if Contains(quote, string(runeArr[0])) { // if rune array contains quotation marks
+			quoteCounter++
+			if len(runeArr) 
+
+			if len(runeArr) == 1 && quoteCounter == 2 { // code for last apostrophe
+				strContent[i-1] += string(runeArr[0])
+				strContent = append(strContent[:i], strContent[i+1:]...)
+			}
+		}
+	}
+	return strContent
 }
 
 // // move punctuation
@@ -118,8 +177,8 @@ func fixApostrophes(strContent []string) []string {
 // }
 
 func main() {
-	args := os.Args
-	input, err := os.ReadFile(args[1])
+	// args := os.Args
+	input, err := os.ReadFile("sample.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -129,9 +188,13 @@ func main() {
 	converted := convertString(strContent) // hex, bin, cap etc
 	convertedA := aToAn(converted)         // a to an
 	convertedP := fixPunct(convertedA)     // fix non-quotes punctuation
+	convertedAP := fixApostrophes(convertedP)
 
 	fmt.Println(strContent)
 	fmt.Println(converted)
 	fmt.Println(convertedA)
 	fmt.Println(convertedP)
+	fmt.Println(convertedAP)
+
+	// os.create
 }
