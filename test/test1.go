@@ -82,36 +82,106 @@ func aToAn(strContent []string) []string {
 }
 
 // find and fix non-quote punctuation (if space BEFORE punctuation)
-func fixPunct(strContent []string) []string {
-	for i := 0; i < len(strContent); i++ {
-		punctArray := []string{",", ".", "!", "?", ":", ";"}
-		runeArr := []rune(strContent[i])
-		if Contains(punctArray, string(runeArr[0])) { // if rune contains any punctuation
-			if len(runeArr) > 1 { // if punctuation is next to a letter or part of a group
-				punctCounter := 0
-				// if rune array contains punctuation while punctCounter is less than the rune array length
-				for punctCounter < len(runeArr) && Contains(punctArray, string(runeArr[punctCounter])) {
-					punctCounter++ // when group of punct = 2, punctCounter = 2
-				}
-				// loop to replace everything before i with j
-				for j := 0; j < punctCounter; j++ {
-					strContent[i-1] += string(runeArr[j])
-					strContent[i] = string(runeArr[j:])
-				}
-				// when punctCounter = length of rune array
-				if punctCounter == len(runeArr) {
-					// append string to include everything except i
-					strContent = append(strContent[:i], strContent[i+1:]...)
-				}
-			}
-			if len(runeArr) == 1 { // if punctuation is by itself (space on either side)
-				strContent[i-1] += string(runeArr[0])
-				strContent = append(strContent[:i], strContent[i+1:]...)
-			}
+// turns i into a whitespace
+func Insert(r []rune, i int) []rune {
+	r = append(r[:i+1], r[i:]...)
+	r[i] = 32 // 32 = space
+	return r
+}
+
+// checks if punctuation
+func IsPunctuation(c rune) bool {
+	checker := false
+	if c >= 33 && c <= 47 || c == 58 || c == 59 || c == 63 {
+		checker = true
+	}
+	return checker
+}
+
+func RemoveAddWhiteSpace(s string) string {
+	r := []rune(s)
+	for i, ch := range r {
+		// Delete whitespace after apostrophe
+		if i < len(r)-1 && ch == 39 && r[i+1] == 32 {
+			r = append(r[:i+1], r[i+2:]...)
+		}
+		// Deleting whitespace before all punctuation
+		if (i < len(r)-1 && IsPunctuation(ch) && r[i-1] == 32) || (i == len(r)-1 && IsPunctuation(ch) && r[i-1] == 32) {
+			r = append(r[:i-1], r[i:]...)
+		}
+		// Inserting whitespace after commas or colons or semi-colons
+		if i < len(r)-1 && ch == 44 && r[i+1] != 32 || i < len(r)-1 && ch == 58 && r[i+1] != 32 || i < len(r)-1 && ch == 59 && r[i+1] != 32 {
+			r = Insert(r, i)
 		}
 	}
-	return strContent
+	return string(r)
 }
+
+// func fixPunct(strContent []string) []string {
+// // peter's code
+// 	words := strings.Split(strContent, " ")
+// 	s := words[0]
+// 	puncts := []string{"!!!", "???", "!!", "??", "...", "..", ",", ".", ";", ":", "!", "?"}
+// 	var inQuotes bool
+// 	var punctuated bool
+// 	for i := 1; i < len(words); i++ {
+// 		switch words[i] {
+// 		case "":
+// 		case ",", ".", ";", ":", "!", "?", "...", "..", "!?", "?!", "!!", "!!!", "??", "???":
+// 			s += words[i]
+// 		case "'":
+// 			if inQuotes == false {
+// 				inQuotes = true
+// 				words[i+1] = "'" + words[i+1]
+// 			} else {
+// 				inQuotes = false
+// 				s += "'"
+// 			}
+// 		default:
+// 			for j := 0; j < len(puncts); j++ {
+// 				if strings.HasPrefix(words[i], puncts[j]) && punctuated == false {
+// 					s += puncts[j] + " " + strings.TrimPrefix(words[i], puncts[j])
+// 					punctuated = true
+// 				}
+// 			}
+// 			if punctuated == false {
+// 				s += " " + words[i]
+// 			}
+// 			punctuated = false
+// 		}
+// 	}
+// 	return words
+
+// harry's code
+// 	for i := 0; i < len(strContent); i++ {
+// 		punctArray := []string{",", ".", "!", "?", ":", ";"}
+// 		runeArr := []rune(strContent[i])
+// 		if Contains(punctArray, string(runeArr[0])) { // if rune contains any punctuation
+// 			if len(runeArr) > 1 { // if punctuation is next to a letter or part of a group
+// 				punctCounter := 0
+// 				// if rune array contains punctuation while punctCounter is less than the rune array length
+// 				for punctCounter < len(runeArr) && Contains(punctArray, string(runeArr[punctCounter])) {
+// 					punctCounter++ // when group of punct = 2, punctCounter = 2
+// 				}
+// 				// loop to replace everything before i with j
+// 				for j := 0; j < punctCounter; j++ {
+// 					strContent[i-1] += string(runeArr[j])
+// 					strContent[i] = string(runeArr[j:])
+// 				}
+// 				// when punctCounter = length of rune array
+// 				if punctCounter == len(runeArr) {
+// 					// append string to include everything except i
+// 					strContent = append(strContent[:i], strContent[i+1:]...)
+// 				}
+// 			}
+// 			if len(runeArr) == 1 { // if punctuation is by itself (space on either side)
+// 				strContent[i-1] += string(runeArr[0])
+// 				strContent = append(strContent[:i], strContent[i+1:]...)
+// 			}
+// 		}
+// 	}
+// 	return strContent
+// }
 
 // function to find out whether a string contains another string
 func Contains(elems []string, v string) bool {
@@ -205,6 +275,16 @@ func fixApostrophes(strContent string) string {
 // 	return strContent
 // }
 
+func fixSpaces(strContent string) string {
+	runes := []rune(strContent)
+	for i := 0; i < len(runes); i++ {
+		if runes[i] == ' ' && runes[i+1] == ' ' {
+			runes = append(runes[:i], runes[i+1:]...)
+		}
+	}
+	return string(runes)
+}
+
 func main() {
 	args := os.Args
 	input, err := os.ReadFile(args[1])
@@ -217,13 +297,14 @@ func main() {
 	// }
 
 	str := string(input)
-	str1 := strings.Split(str, " ")                 // separate by whitespaces
-	str2 := convertString(str1)                     // hex, bin, cap etc
-	str3 := aToAn(str2)                             // a to an
-	str4 := fixPunct(str3)                          // fix non-quotes punctuation
-	str5 := fixApostrophes(strings.Join(str4, " ")) // fix quotation marks
+	str1 := strings.Split(str, " ")                      // separate by whitespaces
+	str2 := convertString(str1)                          // hex, bin, cap etc
+	str3 := aToAn(str2)                                  // a to an
+	str4 := RemoveAddWhiteSpace(strings.Join(str3, " ")) // fix non-quotes punctuation
+	str5 := fixApostrophes(str4)                         // fix quotation marks
+	str6 := fixSpaces(str5)
 
-	err = os.WriteFile("result.txt", []byte(str5), 0666)
+	err = os.WriteFile("result.txt", []byte(str6), 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
