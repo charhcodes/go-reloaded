@@ -71,7 +71,7 @@ func convertString(strContent []string) []string {
 // convert 'a' to 'an' when next word begins with a vowel or 'h'
 func aToAn(strContent []string) []string {
 	for i := 0; i < len(strContent); i++ {
-		if strContent[i] == "a" {
+		if strContent[i] == "a" || strContent[i] == "A" {
 			runes := []rune(strContent[i+1])
 			if runes[0] == 'a' || runes[0] == 'e' || runes[0] == 'i' || runes[0] == 'o' || runes[0] == 'u' || runes[0] == 'h' {
 				strContent[i] += "n"
@@ -89,9 +89,9 @@ func fixPunct(strContent []string) []string {
 		if Contains(punctArray, string(runeArr[0])) { // if rune contains any punctuation
 			if len(runeArr) > 1 { // if punctuation is next to a letter or part of a group
 				punctCounter := 0
-				// if rune array contains punctuation and punct
+				// if rune array contains punctuation while punctCounter is less than the rune array length
 				for punctCounter < len(runeArr) && Contains(punctArray, string(runeArr[punctCounter])) {
-					punctCounter++
+					punctCounter++ // when group of punct = 2, punctCounter = 2
 				}
 				// loop to replace everything before i with j
 				for j := 0; j < punctCounter; j++ {
@@ -103,7 +103,8 @@ func fixPunct(strContent []string) []string {
 					// append string to include everything except i
 					strContent = append(strContent[:i], strContent[i+1:]...)
 				}
-			} else { // if punctuation is by itself (space on either side)
+			}
+			if len(runeArr) == 1 { // if punctuation is by itself (space on either side)
 				strContent[i-1] += string(runeArr[0])
 				strContent = append(strContent[:i], strContent[i+1:]...)
 			}
@@ -210,10 +211,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	output, err := os.ReadFile(args[2])
-	if err != nil {
-		log.Fatal(err)
-	}
+	// output, err := os.ReadFile(args[2])
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	str := string(input)
 	str1 := strings.Split(str, " ")                 // separate by whitespaces
@@ -222,9 +223,7 @@ func main() {
 	str4 := fixPunct(str3)                          // fix non-quotes punctuation
 	str5 := fixApostrophes(strings.Join(str4, " ")) // fix quotation marks
 
-	fmt.Println(str)
-
-	err = os.WriteFile(args[2], []byte(str5), 0666)
+	err = os.WriteFile("result.txt", []byte(str5), 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
