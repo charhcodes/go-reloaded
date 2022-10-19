@@ -123,26 +123,26 @@ func Contains(elems []string, v string) bool {
 }
 
 // global counters for apostrophes
-var (
-	quoteCount int
-	counter    int = 0
-)
+// var (
+// 	quoteCount int
+// 	counter    int = 0
+// )
 
 // find and fix apostrophes
-func fixApostrophes(strContent []string) []string {
-	for i := 0; i < len(strContent); i++ {
-		quote := []string{"'"}
-		stringContent := strings.Join(strContent, "")
-		if Contains(quote, string(stringContent)) && quoteCount == 0 {
-			quoteCount++
-			strContent[i+1] = strContent[i] + strContent[i+1]
-			strContent, counter = RemoveIndex(strContent, i, counter)
-		} else if quoteCount == 1 {
-			strContent[i-1] = strContent[i-1] + strContent[i]
-			strContent, counter = RemoveIndex(strContent, i, counter)
-		}
-	}
-	return strContent
+func fixApostrophes(strContent string) string {
+	// for i := 0; i < len(strContent); i++ {
+	// 	quote := []string{"'"}
+	// 	stringContent := strings.Join(strContent, "")
+	// 	if Contains(quote, string(stringContent)) && quoteCount == 0 {
+	// 		quoteCount++
+	// 		strContent[i+1] = strContent[i] + strContent[i+1]
+	// 		strContent, counter = RemoveIndex(strContent, i, counter)
+	// 	} else if quoteCount == 1 {
+	// 		strContent[i-1] = strContent[i-1] + strContent[i]
+	// 		strContent, counter = RemoveIndex(strContent, i, counter)
+	// 	}
+	// }
+	// return strContent
 
 	// for i, quote := range strContent {
 	// 	if quote == "'" && quoteCount == 0 {
@@ -156,13 +156,39 @@ func fixApostrophes(strContent []string) []string {
 	// 	}
 	// }
 	// return strContent
+
+	str := ""
+	var removeSpace bool
+	// stringCont := strings.Join(strContent, "")
+	for i, char := range strContent {
+		if char == 39 && strContent[i-1] == ' ' {
+			if removeSpace {
+				str = str[:len(str)-1]
+				str = str + string(char)
+				removeSpace = false
+			} else {
+				str = str + string(char)
+				removeSpace = true
+			}
+		} else if i > 1 && strContent[i-2] == 39 && strContent[i-1] == ' ' {
+			if removeSpace {
+				str = str[:len(str)-1]
+				str = str + string(char)
+			} else {
+				str = str + string(char)
+			}
+		} else {
+			str = str + string(char)
+		}
+	}
+	return str
 }
 
 // remove index values
-func RemoveIndex(strContent []string, index int, counter int) ([]string, int) {
-	counter++
-	return append(strContent[:index], strContent[index+1:]...), counter
-}
+// func RemoveIndex(strContent []string, index int, counter int) ([]string, int) {
+// 	counter++
+// 	return append(strContent[:index], strContent[index+1:]...), counter
+// }
 
 // func Recursive(strContent []string) []string {
 // 	for _, current := range strContent {
@@ -184,19 +210,22 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	output, err := os.ReadFile(args[2])
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	str := string(input)
-	strContent := strings.Split(str, " ")    // separate by whitespaces
-	converted := convertString(strContent)   // hex, bin, cap etc
-	convertedA := aToAn(converted)           // a to an
-	convertedP := fixPunct(convertedA)       // fix non-quotes punctuation
-	convertedQ := fixApostrophes(convertedP) // fix quotation marks
+	str1 := strings.Split(str, " ")                 // separate by whitespaces
+	str2 := convertString(str1)                     // hex, bin, cap etc
+	str3 := aToAn(str2)                             // a to an
+	str4 := fixPunct(str3)                          // fix non-quotes punctuation
+	str5 := fixApostrophes(strings.Join(str4, " ")) // fix quotation marks
 
-	fmt.Println(strContent)
-	fmt.Println(converted)
-	fmt.Println(convertedA)
-	fmt.Println(convertedP)
-	fmt.Println(convertedQ)
+	fmt.Println(str)
 
-	// os.create
+	err = os.WriteFile(args[2], []byte(str5), 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
