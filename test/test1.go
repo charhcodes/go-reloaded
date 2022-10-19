@@ -83,17 +83,6 @@ func aToAn(strContent []string) []string {
 
 // find and fix non-quote punctuation (if space BEFORE punctuation)
 func fixPunct(strContent []string) []string {
-	// runes := []rune(strings.Join(strContent, " "))
-	// for i := 1; i < len(strContent); i++ {
-	// 	if runes[i] == '.' || runes[i] == ',' || runes[i] == '!' || runes[i] == '?' || runes[i] == ';' || runes[i] == ':' {
-	// 		if runes[i-1] == ' ' {
-	// 			runes[i], runes[i-1] = runes[i-1], runes[i]
-	// 		}
-	// 	}
-	// }
-	// runeString := string(runes)
-	// sliceString := strings.Split(runeString, " ")
-	// return sliceString
 	for i := 0; i < len(strContent); i++ {
 		punctArray := []string{",", ".", "!", "?", ":", ";"}
 		runeArr := []rune(strContent[i])
@@ -133,68 +122,61 @@ func Contains(elems []string, v string) bool {
 	return false
 }
 
-// func fixApostrophes1(strContent []string) []string {
-// 	counter := 0
-// 	for i := 0; i < len(strContent); i++ {
-// 		quote := []string{"'"}
-// 		runeArr := []rune(strContent[i])
-// 		if counter == 0 && Contains(quote, string(runeArr[0])) {
-// 			counter += 1
-// 			strContent[i+1] = string(runeArr) + strContent[i+1]
-// 			strContent = append(strContent[:i], strContent[i+1:]...)
-// 		}
-// 	}
-// 	return strContent
-// }
+// global counters for apostrophes
+var (
+	quoteCount int
+	counter    int = 0
+)
 
-// find and fix last apostrophe
+// find and fix apostrophes
 func fixApostrophes(strContent []string) []string {
-	// runes := []rune(strings.Join(strContent, " "))
-	// for i := 1; i < len(strContent); i++ {
-	// 	if runes[i] == 39 { // 39 = apostrophe
-	// 		// if apostrophe is next to a space and a letter
-	// 		if runes[i+1] == ' ' && (runes[i+2] <= 'A' && runes[i+2] >= 'Z' || runes[i+2] <= 'a' && runes[i+2] >= 'z') {
-	// 			runes[i], runes[i+1] = runes[i+1], runes[i]
-	// 		}
-	// 	}
-	// }
-	// runeString := string(runes)
-	// sliceString := strings.Split(runeString, " ")
-	// return sliceString
-
 	for i := 0; i < len(strContent); i++ {
 		quote := []string{"'"}
-		runeArr := []rune(strContent[i])
-		counter := 0
-		if Contains(quote, string(runeArr[0])) { // if rune array contains quotation marks
-			// for last apostrophe
-			if len(runeArr) == 1 {
-				strContent[i-1] += string(runeArr[0])
-				strContent = append(strContent[:i], strContent[i+1:]...) // moves apostrophe back one space if by itself
-				counter++
-			}
-		} else if Contains(quote, string(runeArr[0])) && runeArr[1] == ' ' && counter == 1 {
-			strContent[i+1] += string(runeArr[0])
-			strContent = append(strContent[:i], strContent[i+1:]...)
+		stringContent := strings.Join(strContent, "")
+		if Contains(quote, string(stringContent)) && quoteCount == 0 {
+			quoteCount++
+			strContent[i+1] = strContent[i] + strContent[i+1]
+			strContent, counter = RemoveIndex(strContent, i, counter)
+		} else if quoteCount == 1 {
+			strContent[i-1] = strContent[i-1] + strContent[i]
+			strContent, counter = RemoveIndex(strContent, i, counter)
 		}
 	}
 	return strContent
-	// counter := 0
-	// for i, word := range strContent {
-	// 	if word == "'" && counter == 0 {
-	// 		counter += 1
-	// 		strContent[i+1] = word + strContent[i+1]
-	// 		strContent = append(strContent[:1], strContent[i+1:]...)
-	// 	}
-	// }
-	// for i, word := range strContent {
-	// 	if word == "'" {
-	// 		strContent[i-1] = strContent[i-1] + word
-	// 		strContent = append(strContent[:1], strContent[i+1:]...)
+
+	// for i, quote := range strContent {
+	// 	if quote == "'" && quoteCount == 0 {
+	// 		quoteCount++
+	// 		strContent[i+1] = strContent[i] + strContent[i+1]
+	// 		strContent, counter = RemoveIndex(strContent, i, counter)
+	// 	} else if quoteCount == 1 && quote == "'" {
+	// 		quoteCount--
+	// 		strContent[i-1] = strContent[i-1] + strContent[i]
+	// 		strContent, counter = RemoveIndex(strContent, i, counter)
 	// 	}
 	// }
 	// return strContent
 }
+
+// remove index values
+func RemoveIndex(strContent []string, index int, counter int) ([]string, int) {
+	counter++
+	return append(strContent[:index], strContent[index+1:]...), counter
+}
+
+// func Recursive(strContent []string) []string {
+// 	for _, current := range strContent {
+// 		currentRune := []rune(current)
+// 		if len(currentRune) == 1 {
+// 			if currentRune[0] == 39 {
+// 				strContent = fixApostrophes(strContent, quoteCount)
+// 				Recursive(strContent)
+// 				break
+// 			}
+// 		}
+// 	}
+// 	return strContent
+// }
 
 func main() {
 	args := os.Args
@@ -204,19 +186,17 @@ func main() {
 	}
 
 	str := string(input)
-	strContent := strings.Split(str, " ")     // separate by whitespaces
-	converted := convertString(strContent)    // hex, bin, cap etc
-	convertedA := aToAn(converted)            // a to an
-	convertedP := fixPunct(convertedA)        // fix non-quotes punctuation
-	convertedAP := fixApostrophes(convertedP) // fixes quotation marks (last)
-	// convertedAP1 := fixApostrophes1(convertedAP) // fixes quotation marks (first)
+	strContent := strings.Split(str, " ")    // separate by whitespaces
+	converted := convertString(strContent)   // hex, bin, cap etc
+	convertedA := aToAn(converted)           // a to an
+	convertedP := fixPunct(convertedA)       // fix non-quotes punctuation
+	convertedQ := fixApostrophes(convertedP) // fix quotation marks
 
 	fmt.Println(strContent)
 	fmt.Println(converted)
 	fmt.Println(convertedA)
 	fmt.Println(convertedP)
-	fmt.Println(convertedAP)
-	// fmt.Println(convertedAP1)
+	fmt.Println(convertedQ)
 
 	// os.create
 }
