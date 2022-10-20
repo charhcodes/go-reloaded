@@ -184,14 +184,14 @@ func RemoveAddWhiteSpace(s string) string {
 // }
 
 // function to find out whether a string contains another string
-func Contains(elems []string, v string) bool {
-	for _, s := range elems {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
+// func Contains(elems []string, v string) bool {
+// 	for _, s := range elems {
+// 		if v == s {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
 
 // global counters for apostrophes
 // var (
@@ -285,6 +285,30 @@ func fixSpaces(strContent string) string {
 	return string(runes)
 }
 
+// func aToAn(strContent []string) []string {
+// 	for i := 0; i < len(strContent); i++ {
+// 		if strContent[i] == "a" || strContent[i] == "A" {
+// 			runes := []rune(strContent[i+1])
+// 			if runes[0] == 'a' || runes[0] == 'e' || runes[0] == 'i' || runes[0] == 'o' || runes[0] == 'u' || runes[0] == 'h' {
+// 				strContent[i] += "n"
+// 			}
+// 		}
+// 	}
+// 	return strContent
+// }
+
+func puncSpaces(strContent []string) []string {
+	for i := 0; i < len(strContent); i++ {
+		if strContent[i] == "." || strContent[i] == "," || strContent[i] == ":" || strContent[i] == ";" {
+			runes := []rune(strContent[i+1])
+			if runes[0] == 39 {
+				strContent[i] += " "
+			}
+		}
+	}
+	return strContent
+}
+
 func main() {
 	args := os.Args
 	input, err := os.ReadFile(args[1])
@@ -303,8 +327,9 @@ func main() {
 	str4 := RemoveAddWhiteSpace(strings.Join(str3, " ")) // fix non-quotes punctuation
 	str5 := fixApostrophes(str4)                         // fix quotation marks
 	str6 := fixSpaces(str5)
+	str7 := puncSpaces(strings.Split(str6, " "))
 
-	err = os.WriteFile("result.txt", []byte(str6), 0666)
+	err = os.WriteFile("result.txt", []byte(strings.Join(str7, " ")), 0666)
 	if err != nil {
 		log.Fatal(err)
 	}

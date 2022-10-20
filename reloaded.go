@@ -178,7 +178,7 @@ func main() {
 	str3 := aToAn(str2)                                  // a to an
 	str4 := RemoveAddWhiteSpace(strings.Join(str3, " ")) // fix non-quotes punctuation
 	str5 := fixApostrophes(str4)                         // fix quotation marks
-	str6 := fixSpaces(str5)
+	str6 := fixSpaces(str5)                              // fix double spaces
 
 	err = os.WriteFile("result.txt", []byte(str6), 0666)
 	if err != nil {
