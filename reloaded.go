@@ -102,7 +102,7 @@ func RemoveAddWhiteSpace(s string) string {
 	r := []rune(s)
 	for i, ch := range r {
 		// Delete whitespace after apostrophe
-		if i < len(r)-1 && ch == 39 && r[i+1] == 32 {
+		if i < len(r)-1 && (ch == 39 || ch == 96) && r[i+1] == 32 {
 			r = append(r[:i+1], r[i+2:]...)
 		}
 		// Deleting whitespace before all punctuation
@@ -132,7 +132,7 @@ func fixApostrophes(strContent string) string {
 	str := ""
 	var removeSpace bool
 	for i, char := range strContent {
-		if char == 39 && strContent[i-1] == ' ' {
+		if (char == 39 || char == 96) && strContent[i-1] == ' ' {
 			if removeSpace {
 				str = str[:len(str)-1]
 				str = str + string(char)
@@ -141,7 +141,7 @@ func fixApostrophes(strContent string) string {
 				str = str + string(char)
 				removeSpace = true
 			}
-		} else if i > 1 && strContent[i-2] == 39 && strContent[i-1] == ' ' {
+		} else if i > 1 && (strContent[i-2] == 39 || strContent[i-2] == 96) && strContent[i-1] == ' ' {
 			if removeSpace {
 				str = str[:len(str)-1]
 				str = str + string(char)
