@@ -66,7 +66,7 @@ func convertString(strContent []string) []string {
 		}
 	}
 	return emptyString
-}
+}Don not be sad ,because sad backwards is das . And das not good
 
 // convert 'a' to 'an' when next word begins with a vowel or 'h'
 func aToAn(strContent []string) []string {
@@ -83,15 +83,15 @@ func aToAn(strContent []string) []string {
 
 // turns i into a whitespace
 func spacer(runes []rune, i int) []rune {
-	runes = append(runes[:i+1], runes[i:]...) // appends everything before and including i+1 of slice to everything after slice after i
-	runes[i] = 32                             // r index becomes a space
+	runes = append(runes[:i+1], runes[i:]...) // appends everything before i+1 (including i) of slice to everything after slice (including i)
+	runes[i] = 32                             // r index becomes a space (second i)
 	return runes
 }
 
 // checks if punctuation
 func punctCheck(c rune) bool {
 	checker := false
-	if c >= 33 && c <= 47 || c == 58 || c == 59 || c == 63 {
+	if (c >= 33 && c <= 47 || c == 58 || c == 59 || c == 63) && c != 39 { // if punctuation (NOT APOSTROPHE)
 		checker = true
 	}
 	return checker
@@ -100,11 +100,6 @@ func punctCheck(c rune) bool {
 func fixPunct(s string) string {
 	runes := []rune(s)
 	for i, ch := range runes {
-		// Delete whitespace after apostrophe
-		// if apostrophe is not the last character and there is a space after it
-		if i < len(runes)-1 && (ch == 39 || ch == 96) && runes[i+1] == 32 {
-			runes = append(runes[:i+1], runes[i+2:]...) // append everything excluding the space after the apostrophe
-		}
 		// Deleting whitespace before all punctuation
 		if (i < len(runes)-1 && punctCheck(ch) && runes[i-1] == 32) || (i == len(runes)-1 && punctCheck(ch) && runes[i-1] == 32) {
 			runes = append(runes[:i-1], runes[i:]...) // append everything excluding the space before punctuation
@@ -118,40 +113,28 @@ func fixPunct(s string) string {
 	return string(runes)
 }
 
-// function to find out whether a string contains another string
-// func Contains(elems []string, v string) bool {
-// 	for _, s := range elems {
-// 		if v == s {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
 // find and fix apostrophes
 func fixApostrophes(strContent string) string {
 	str := ""        // empty string
 	var checker bool // boolean to check
 	for i, ch := range strContent {
 		if (ch == 39 || ch == 96) && strContent[i-1] == ' ' { // if ch is an apostrophe and there is a space before it
-			if checker { // if checker is true
-				str = str[:len(str)-1] // remove last character from string
-				str = str + string(ch) // add apostrophe to string
-				checker = false        // set checker to false
-			} else { // if checker is false
+			if checker { // WHEN LAST APOSTROPHE
+				str = str[:len(str)-1] // remove space
+				str = str + string(ch) // add character to string
+				checker = false        // set checker to false (in case there are more apostrophes in string)
+			} else { // checker is false, found FIRST APOSTROPHE
 				str = str + string(ch) // add apostrophe to string
 				checker = true         // set checker to true
 			}
-		} else if i > 1 && (strContent[i-2] == 39 || strContent[i-2] == 96) && strContent[i-1] == ' ' {
-			// if not the first character and character before is a space
-			// and character before the space is an apostrophe
-			if checker {
-				str = str[:len(str)-1]
-				str = str + string(ch)
-			} else {
+		} else if i > 1 && (strContent[i-2] == 39 || strContent[i-2] == 96) && strContent[i-1] == ' ' { // finds apostrophe, when i is two spaces ahead
+			if checker { // checker is true (this happens after previous else statement)
+				str = str[:len(str)-1] // deletes space
+				str = str + string(ch) // adds character to string
+			} else { // any other character
 				str = str + string(ch)
 			}
-		} else {
+		} else { // when there is NO apostrophe
 			str = str + string(ch)
 		}
 	}
